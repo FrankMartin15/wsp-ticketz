@@ -1,6 +1,10 @@
 [![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
 [![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.pt.md)
 
+# Ticketz (Versión personalizada)
+
+Basado en el proyecto open-source Ticketz (https://github.com/ticketz-oss/ticketz).
+
 # About the Project
 
 Ticketz is a communicator with CRM and helpdesk features that utilizes WhatsApp as a means of communication with clients.
