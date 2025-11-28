@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import Button from "@material-ui/core/Button";
@@ -8,6 +8,16 @@ import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid"; 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
+import EmailIcon from "@material-ui/icons/Email";
+import LockIcon from "@material-ui/icons/Lock";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import Turnstile from "react-turnstile";
+import { toast } from "react-toastify";
 
 import { i18n } from "../../translate/i18n";
 
@@ -16,47 +26,156 @@ import useSettings from "../../hooks/useSettings";
 
 const useStyles = makeStyles(theme => ({
 	root: {
-		width: "100vw",
+		margin: 0,
+		fontFamily: "'Segoe UI', sans-serif",
+		background: "#f5f5f5",
+		display: "flex",
 		height: "100vh",
-		background: `linear-gradient(to right, ${ theme.mode === "light" ? "#fff , #fff , " + theme.palette.primary.main + " , #fff, #fff" : "#000, #000, " + theme.palette.primary.main + ", #000, #000" })`,
-		backgroundRepeat: "no-repeat",
-		backgroundSize: "100% 100%",
-		backgroundPosition: "center",
+		width: "100vw",
+		overflow: "hidden",
+	},
+	container: {
+		display: "flex",
+		width: "100%",
+	},
+	loginPanel: {
+		width: "100%",
+		maxWidth: "480px",
+		background: "#fff",
+		padding: "50px",
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "center",
+		boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+		overflowY: "auto",
+	},
+	logoContainer: {
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
-		justifyContent: "center",
+		marginBottom: "30px",
+	},
+	logoImg: {
+		width: "220px",
+		marginBottom: "25px",
+		display: "block",
+		maxWidth: "100%",
+		height: "auto",
+	},
+	title: {
+		marginBottom: "0",
+		fontWeight: 600,
+		color: "#222",
+		fontSize: "24px",
 		textAlign: "center",
 	},
-	paper: {
-		backgroundColor: theme.palette.login, //DARK MODE PLW DESIGN//
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-		padding: "55px 30px",
-		borderRadius: "12.5px",
-	},
-	avatar: {
-		margin: theme.spacing(1),  
-		backgroundColor: theme.palette.secondary.main,
-	},
 	form: {
-		width: "100%", // Fix IE 11 issue.
-		marginTop: theme.spacing(1),
+		width: "100%",
+	},
+	inputGroup: {
+		marginBottom: "20px",
+	},
+	inputLabel: {
+		fontWeight: 500,
+		fontSize: "14px",
+		marginBottom: "5px",
+		display: "block",
+		color: "#333",
+	},
+	textField: {
+		"& .MuiOutlinedInput-root": {
+			borderRadius: "6px",
+			backgroundColor: "#ffffff",
+			transition: "all 0.2s ease",
+			"& fieldset": {
+				borderColor: "#ccc",
+				borderWidth: "1px",
+			},
+			"&:hover fieldset": {
+				borderColor: "#00548ba8",
+			},
+			"&.Mui-focused fieldset": {
+				borderColor: "#00548ba8",
+				borderWidth: "1px",
+				boxShadow: "0 0 8px rgba(0,123,255,0.2)",
+			},
+		},
+		"& .MuiOutlinedInput-input": {
+			padding: "14px 12px",
+			color: "#222",
+			fontSize: "15px",
+			fontFamily: "'Segoe UI', sans-serif",
+			"&::placeholder": {
+				color: "#999",
+				opacity: 1,
+			},
+		},
+		"& .MuiInputLabel-outlined": {
+			display: "none",
+		},
+		"& .MuiInputAdornment-root": {
+			color: "#666",
+		},
+	},
+	iconButton: {
+		padding: "8px",
+		color: "#666",
+		"&:hover": {
+			color: "#00548ba8",
+			backgroundColor: "transparent",
+		},
+	},
+	captchaCheck: {
+		display: "flex",
+		alignItems: "center",
+		gap: "10px",
+		marginBottom: "20px",
+		marginTop: "10px",
+	},
+	turnstileContainer: {
+		marginBottom: "20px",
+		display: "flex",
+		justifyContent: "center",
+		"& > div": {
+			width: "100% !important",
+			maxWidth: "300px",
+		},
 	},
 	submit: {
-		margin: theme.spacing(3, 0, 2),
+		background: "linear-gradient(135deg, #005d81, #0082b6)",
+		color: "#fff",
+		width: "100%",
+		padding: "14px",
+		fontSize: "16px",
+		border: "none",
+		borderRadius: "8px",
+		cursor: "pointer",
+		transition: "0.3s",
+		fontWeight: 600,
+		textTransform: "none",
+		"&:hover": {
+			transform: "translateY(-2px)",
+			background: "linear-gradient(135deg, #004d6d, #006d95)",
+			boxShadow: "0 4px 12px rgba(0,123,255,0.3)",
+		},
 	},
-	powered: {
-		color: "white"
+	imagePanel: {
+		flex: 1,
+		backgroundImage: "url('https://edybs.com/wp-content/uploads/2025/11/familia.jpeg')",
+		backgroundSize: "cover",
+		backgroundPosition: "center",
+		display: "block",
+		"@media(max-width: 900px)": {
+			display: "none",
+		},
 	},
-	
-	logoImg: {
-    width: "100%",
-    margin: "0 auto",
-    content: `url("${theme.calculatedLogo()}")`
-  }
-	
+	"@media(max-width: 900px)": {
+		loginPanel: {
+			maxWidth: "100%",
+			width: "100%",
+			height: "100vh",
+		},
+	},
 }));
 
 const Login = () => {
@@ -65,16 +184,44 @@ const Login = () => {
 
 	const [user, setUser] = useState({ email: "", password: "" });
 	const [allowSignup, setAllowSignup] = useState(false);
+	const [captchaChecked, setCaptchaChecked] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [turnstileToken, setTurnstileToken] = useState("");
+	const [config, setConfig] = useState({});
+	const turnstileRef = useRef(null);
 
 	const { handleLogin } = useContext(AuthContext);
+	
+	const handleClickShowPassword = () => {
+		setShowPassword(!showPassword);
+	};
+
+	const handleMouseDownPassword = (event) => {
+		event.preventDefault();
+	};
+	
+	const handleTurnstileVerify = (token) => {
+		setTurnstileToken(token);
+	};
 
 	const handleChangeInput = e => {
 		setUser({ ...user, [e.target.name]: e.target.value.trim() });
 	};
 
-	const handlSubmit = e => {
+	const handlSubmit = async (e) => {
 		e.preventDefault();
-		handleLogin(user);
+		
+		if (config.TURNSTILE_SITE_KEY && !turnstileToken) {
+			toast.error("Por favor completa la verificación de seguridad");
+			return;
+		}
+		
+		const loginData = { ...user };
+		if (config.TURNSTILE_SITE_KEY) {
+			loginData.turnstileToken = turnstileToken;
+		}
+		
+		handleLogin(loginData);
 	};
 
   useEffect(() => {
@@ -85,72 +232,135 @@ const Login = () => {
     ).catch((error) => {
       console.log("Error reading setting",error);
     });
+    
+    // Cargar configuración de Turnstile
+    fetch("/config.json")
+      .then((response) => response.json())
+      .then((data) => {
+        setConfig(data);
+      })
+      .catch((error) => {
+        console.log("Error loading config", error);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 	return (
 		<div className={classes.root}>
-		<Container component="main" maxWidth="xs">
 			<CssBaseline/>
-			<div className={classes.paper}>
-				<div>
-					<img className={classes.logoImg} />
+			<div className={classes.container}>
+				<div className={classes.loginPanel}>
+					<div className={classes.logoContainer}>
+						<img 
+							src="https://edybs.com/wp-content/uploads/2025/11/LOGO_EDY_SANCHEZ__1_-removebg-preview.png" 
+							className={classes.logoImg} 
+							alt="Logo" 
+						/>
+						<h2 className={classes.title}>Acceder a Ticketz</h2>
+					</div>
+					
+					<form className={classes.form} noValidate onSubmit={handlSubmit}>
+						<div className={classes.inputGroup}>
+							<label className={classes.inputLabel}>Correo electrónico</label>
+							<TextField
+								variant="outlined"
+								required
+								fullWidth
+								id="email"
+								placeholder="Ingresa tu correo"
+								name="email"
+								value={user.email}
+								onChange={handleChangeInput}
+								autoComplete="email"
+								autoFocus
+								className={classes.textField}
+								InputLabelProps={{ shrink: false }}
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position="start">
+											<EmailIcon />
+										</InputAdornment>
+									),
+								}}
+							/>
+						</div>
+						
+						<div className={classes.inputGroup}>
+							<label className={classes.inputLabel}>Contraseña</label>
+							<TextField
+								variant="outlined"
+								required
+								fullWidth
+								name="password"
+								placeholder="Ingresa tu contraseña"
+								type={showPassword ? "text" : "password"}
+								id="password"
+								value={user.password}
+								onChange={handleChangeInput}
+								autoComplete="current-password"
+								className={classes.textField}
+								InputLabelProps={{ shrink: false }}
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position="start">
+											<LockIcon />
+										</InputAdornment>
+									),
+									endAdornment: (
+										<InputAdornment position="end">
+											<IconButton
+												aria-label="toggle password visibility"
+												onClick={handleClickShowPassword}
+												onMouseDown={handleMouseDownPassword}
+												edge="end"
+												className={classes.iconButton}
+											>
+												{showPassword ? <Visibility /> : <VisibilityOff />}
+											</IconButton>
+										</InputAdornment>
+									),
+								}}
+							/>
+						</div>
+						
+					{config.TURNSTILE_SITE_KEY && (
+						<div className={classes.turnstileContainer}>
+							<Turnstile
+								ref={turnstileRef}
+								sitekey={config.TURNSTILE_SITE_KEY}
+								onVerify={handleTurnstileVerify}
+								theme="light"
+								language="es"
+							/>
+						</div>
+					)}						<Button
+							type="submit"
+							fullWidth
+							variant="contained"
+							className={classes.submit}
+						>
+							Iniciar sesión
+						</Button>
+						
+						{ allowSignup && 
+						  <Grid container style={{ marginTop: "20px", justifyContent: "center" }}>
+							<Grid item>
+								<Link
+									href="#"
+									variant="body2"
+									component={RouterLink}
+									to="/signup"
+									style={{ color: "#025da8a8", fontSize: "14px" }}
+								>
+									{i18n.t("login.buttons.register")}
+								</Link>
+							</Grid>
+						</Grid> }
+					</form>
 				</div>
-				<form className={classes.form} noValidate onSubmit={handlSubmit}>
-					<TextField
-						variant="outlined"
-						margin="normal"
-						required
-						fullWidth
-						id="email"
-						label={i18n.t("login.form.email")}
-						name="email"
-						value={user.email}
-						onChange={handleChangeInput}
-						autoComplete="email"
-						autoFocus
-					/>
-					<TextField
-						variant="outlined"
-						margin="normal"
-						required
-						fullWidth
-						name="password"
-						label={i18n.t("login.form.password")}
-						type="password"
-						id="password"
-						value={user.password}
-						onChange={handleChangeInput}
-						autoComplete="current-password"
-					/>
-					<Button
-						type="submit"
-						fullWidth
-						variant="contained"
-						color="primary"
-						className={classes.submit}
-					>
-						{i18n.t("login.buttons.submit")}
-					</Button>
-					{ allowSignup && 
-					  <Grid container>
-						<Grid item>
-							<Link
-								href="#"
-								variant="body2"
-								component={RouterLink}
-								to="/signup"
-							>
-								{i18n.t("login.buttons.register")}
-							</Link>
-						</Grid>
-					</Grid> }
-				</form>
-			
+				
+				<div className={classes.imagePanel}></div>
 			</div>
-			
-			
-		</Container>
 		</div>
 	);
 };

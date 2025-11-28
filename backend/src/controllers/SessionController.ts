@@ -6,6 +6,7 @@ import AuthUserService from "../services/UserServices/AuthUserService";
 import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import FindUserFromToken from "../services/AuthServices/FindUserFromToken";
+import VerifyTurnstileService from "../services/AuthServices/VerifyTurnstileService";
 import User from "../models/User";
 import { SerializeUser } from "../helpers/SerializeUser";
 import { createAccessToken, createRefreshToken } from "../helpers/CreateTokens";
@@ -14,7 +15,16 @@ import Setting from "../models/Setting";
 import Translation from "../models/Translation";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { email, password } = req.body;
+  const { email, password, turnstileToken } = req.body;
+  
+  // Verificar Turnstile si está configurado
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    const clientIp = req.ip || req.connection.remoteAddress || "";
+    await VerifyTurnstileService({
+      token: turnstileToken,
+      remoteip: clientIp
+    });
+  }
 
   const langs = await Translation.findAll({
     attributes: ["language"],
