@@ -176,6 +176,105 @@ const useStyles = makeStyles(theme => ({
 			height: "100vh",
 		},
 	},
+	forgotPassword: {
+		marginTop: "20px",
+		textAlign: "center",
+		"& a": {
+			color: "#025da8a8",
+			cursor: "pointer",
+			fontSize: "14px",
+			textDecoration: "none",
+			"&:hover": {
+				textDecoration: "underline",
+			},
+		},
+	},
+	modal: {
+		position: "fixed",
+		top: 0,
+		left: 0,
+		width: "100%",
+		height: "100%",
+		background: "rgba(0,0,0,0.5)",
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+		backdropFilter: "blur(3px)",
+		zIndex: 9999,
+	},
+	modalContent: {
+		background: "#fff",
+		padding: "30px",
+		borderRadius: "10px",
+		maxWidth: "400px",
+		width: "90%",
+		textAlign: "center",
+		boxShadow: "0 0 20px rgba(0,0,0,0.15)",
+		animation: "$shake 0.5s ease",
+	},
+	"@keyframes shake": {
+		"0%, 100%": {
+			transform: "translateX(0) scale(0.9)",
+			opacity: 0,
+		},
+		"10%": {
+			transform: "translateX(-10px) scale(0.95)",
+			opacity: 0.5,
+		},
+		"20%": {
+			transform: "translateX(10px) scale(0.98)",
+			opacity: 0.8,
+		},
+		"30%": {
+			transform: "translateX(-10px) scale(1)",
+			opacity: 1,
+		},
+		"40%": {
+			transform: "translateX(10px) scale(1)",
+		},
+		"50%": {
+			transform: "translateX(-5px) scale(1)",
+		},
+		"60%": {
+			transform: "translateX(5px) scale(1)",
+		},
+		"70%": {
+			transform: "translateX(-2px) scale(1)",
+		},
+		"80%": {
+			transform: "translateX(2px) scale(1)",
+		},
+		"90%": {
+			transform: "translateX(0) scale(1)",
+			opacity: 1,
+		},
+	},
+	modalText: {
+		fontSize: "15px",
+		marginBottom: "25px",
+		color: "#333",
+		lineHeight: 1.6,
+		"& strong": {
+			color: "#025374",
+			fontWeight: 600,
+		},
+	},
+	btnAceptar: {
+		background: "#025374",
+		color: "#fff",
+		padding: "10px 25px",
+		border: "none",
+		borderRadius: "6px",
+		cursor: "pointer",
+		fontSize: "15px",
+		fontWeight: 500,
+		transition: "all 0.3s ease",
+		"&:hover": {
+			background: "#013a52",
+			transform: "translateY(-2px)",
+			boxShadow: "0 4px 12px rgba(2,83,116,0.3)",
+		},
+	},
 }));
 
 const Login = () => {
@@ -188,6 +287,7 @@ const Login = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [turnstileToken, setTurnstileToken] = useState("");
 	const [config, setConfig] = useState({});
+	const [modalOpen, setModalOpen] = useState(false);
 	const turnstileRef = useRef(null);
 
 	const { handleLogin } = useContext(AuthContext);
@@ -202,6 +302,14 @@ const Login = () => {
 	
 	const handleTurnstileVerify = (token) => {
 		setTurnstileToken(token);
+	};
+	
+	const openModal = () => {
+		setModalOpen(true);
+	};
+	
+	const closeModal = () => {
+		setModalOpen(false);
 	};
 
 	const handleChangeInput = e => {
@@ -333,7 +441,9 @@ const Login = () => {
 								language="es"
 							/>
 						</div>
-					)}						<Button
+					)}
+					
+						<Button
 							type="submit"
 							fullWidth
 							variant="contained"
@@ -342,8 +452,12 @@ const Login = () => {
 							Iniciar sesión
 						</Button>
 						
+						<div className={classes.forgotPassword}>
+							<a onClick={openModal}>¿Olvidaste tu contraseña?</a>
+						</div>
+						
 						{ allowSignup && 
-						  <Grid container style={{ marginTop: "20px", justifyContent: "center" }}>
+						  <Grid container style={{ marginTop: "10px", justifyContent: "center" }}>
 							<Grid item>
 								<Link
 									href="#"
@@ -361,6 +475,20 @@ const Login = () => {
 				
 				<div className={classes.imagePanel}></div>
 			</div>
+			
+			{modalOpen && (
+				<div className={classes.modal} onClick={closeModal}>
+					<div className={classes.modalContent} onClick={(e) => e.stopPropagation()}>
+						<p className={classes.modalText}>
+							Para restablecer su contraseña debes comunicarte con el área técnica a través de correo electrónico:
+							<br /><strong>soporte-tkz@edybs.com</strong>
+						</p>
+						<Button onClick={closeModal} className={classes.btnAceptar}>
+							Aceptar
+						</Button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
