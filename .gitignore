@@ -1,6 +1,6 @@
 .docker
 *~
 /.project
-# .env-frontend-local
-# .env-backend-local
-# docker-compose-local.yaml
+.env-frontend-local
+.env-backend-local
+docker-compose-local.yaml
