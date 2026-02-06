@@ -16,8 +16,6 @@ import EmailIcon from "@material-ui/icons/Email";
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import Turnstile from "react-turnstile";
-import { toast } from "react-toastify";
 
 import { i18n } from "../../translate/i18n";
 
@@ -283,12 +281,8 @@ const Login = () => {
 
 	const [user, setUser] = useState({ email: "", password: "" });
 	const [allowSignup, setAllowSignup] = useState(false);
-	const [captchaChecked, setCaptchaChecked] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	const [turnstileToken, setTurnstileToken] = useState("");
-	const [config, setConfig] = useState({});
 	const [modalOpen, setModalOpen] = useState(false);
-	const turnstileRef = useRef(null);
 
 	const { handleLogin } = useContext(AuthContext);
 	
@@ -298,10 +292,6 @@ const Login = () => {
 
 	const handleMouseDownPassword = (event) => {
 		event.preventDefault();
-	};
-	
-	const handleTurnstileVerify = (token) => {
-		setTurnstileToken(token);
 	};
 	
 	const openModal = () => {
@@ -318,18 +308,7 @@ const Login = () => {
 
 	const handlSubmit = async (e) => {
 		e.preventDefault();
-		
-		if (config.TURNSTILE_SITE_KEY && !turnstileToken) {
-			toast.error("Por favor completa la verificación de seguridad");
-			return;
-		}
-		
-		const loginData = { ...user };
-		if (config.TURNSTILE_SITE_KEY) {
-			loginData.turnstileToken = turnstileToken;
-		}
-		
-		handleLogin(loginData);
+		handleLogin(user);
 	};
 
   useEffect(() => {
@@ -340,16 +319,6 @@ const Login = () => {
     ).catch((error) => {
       console.log("Error reading setting",error);
     });
-    
-    // Cargar configuración de Turnstile
-    fetch("/config.json")
-      .then((response) => response.json())
-      .then((data) => {
-        setConfig(data);
-      })
-      .catch((error) => {
-        console.log("Error loading config", error);
-      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -431,18 +400,7 @@ const Login = () => {
 							/>
 						</div>
 						
-					{config.TURNSTILE_SITE_KEY && (
-						<div className={classes.turnstileContainer}>
-							<Turnstile
-								ref={turnstileRef}
-								sitekey={config.TURNSTILE_SITE_KEY}
-								onVerify={handleTurnstileVerify}
-								theme="light"
-								language="es"
-							/>
-						</div>
-					)}
-					
+
 						<Button
 							type="submit"
 							fullWidth

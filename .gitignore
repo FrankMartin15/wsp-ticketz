@@ -4,3 +4,5 @@
 # .env-frontend-local
 # .env-backend-local
 # docker-compose-local.yaml
+.env-backend
+.env-frontend
